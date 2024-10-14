@@ -5,7 +5,9 @@
 
 //para las mayusculas
 /* agregar funcion para convertir nombre a minusculas, crear el char y el strcpy o meterlo todo a la funcion convertir a minusculas.
-   mejorar comparacion con operadores hacer que las listas sean tipo globales y no llamarlas siempre como argumentos. */
+   mejorar comparacion con operadores hacer que las listas sean tipo globales y no llamarlas siempre como argumentos.
+   se podria poner algo para comprobar que el voto sea correcto, y en caso de que no ponga ni F ni D que vuelva a votar (con la misma logica de lo del nombre del legislador)   
+*/
 
 typedef struct nodo {
     char nombre[50];
