@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
+
 //para las mayusculas
 /* agregar funcion para convertir nombre a minusculas, crear el char y el strcpy o meterlo todo a la funcion convertir a minusculas.
 */
