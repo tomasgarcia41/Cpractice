@@ -39,36 +39,7 @@ int main() {
     printf("chicos malos:\n");
     mostrar(inicioChicosMalos);
 
-    // Verificar si se encuentra en la lista
-    if (es_miembro("Cristina", &inicioChicosBuenos)) {
-        printf("\nCristina es un miembro de los chicos buenos.\n");
-    } else {
-        printf("Cristina no es un miembro de los chicos buenos.\n");
-    }
 
-    if (es_miembro("alberto", &inicioChicosMalos)) {
-        printf("alberto es un miembro de los chicos malos.\n");
-    } else {
-        printf("alberto no es un miembro de los chicos malos.\n");
-    }
-
-    if (es_miembro("bruno", &inicioChicosBuenos)) {
-        printf("bruno es un miembro de los chicos buenos.\n");
-    } else {
-        printf("bruno no es un miembro de los chicos buenos.\n");
-    }
-
-    if (es_miembro("david", &inicioChicosMalos)) {
-        printf("david es un miembro de los chicos malos.\n");
-    } else {
-        printf("david no es un miembro de los chicos malos.\n");
-    }
-
-    // Realizar eliminaciones
-    suprimir("alberto", &inicioChicosMalos);
-    suprimir("pedro", &inicioChicosBuenos);
-    suprimir("juan", &inicioChicosMalos);
-    suprimir("cristina", &inicioChicosBuenos);
 
     printf("\nya con los legisladores eliminados:\n");
     printf("chicos buenos:\n");
