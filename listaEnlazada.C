@@ -3,57 +3,53 @@
 #include <string.h>
 #include <ctype.h>
 
-
-//para las mayusculas
-/* agregar funcion para convertir nombre a minusculas, crear el char y el strcpy o meterlo todo a la funcion convertir a minusculas.
-*/
+#define MAX_NOMBRE 25
+#define MAX_VOTO 5
 
 typedef struct nodo {
-    char nombre[50];
+    char nombre[MAX_NOMBRE];
     struct nodo *sgte;
 } lista;
 
+// Funciones
 void mostrar(lista *legisladores);
-void insertar(char nombre[], lista ** legisladores);
+void insertar(const char *nombre, lista **legisladores);
 void liberar(lista *legisladores);
 void convertir_a_minusculas(char *cadena);
-void suprimir(char nombre[], lista **legisladores);
-int es_miembro(char nombre[], lista **legisladores);
+void suprimir(const char *nombre, lista **legisladores);
+int es_miembro(const char *nombre, lista **legisladores);
 void registrar_voto_legisladores(lista **chicosBuenos, lista **chicosMalos);
+void *asignar_memoria(size_t size);
 
 int main() {
     printf("La Sociedad para la Prevencion de Injusticias con el Atun (SPIA) cuenta con diez (10) legisladores.\n"
-           "En la ultima votacion acerca de la prohibicion de la pesca de atun en el Lago Escondido termino en empate con cinco (5) a favor y cinco (5) en contra.\n"
-           "Es por eso, que en el dia de hoy se realizara de nuevo.\n\n");
-           
+           "En la ultima votacion acerca de la prohibicion de la pesca de atun en el Lago Escondido termino en empate con "
+           "cinco (5) a favor y cinco (5) en contra.\nEs por eso, que en el dia de hoy se realizara de nuevo.\n\n");
+
     lista *inicioChicosBuenos = NULL;
     lista *inicioChicosMalos = NULL;
 
     // Insertar nombres en las listas
-    insertar("cristina", &inicioChicosBuenos);
-    insertar("bruno", &inicioChicosBuenos);
-    insertar("ALBERTO", &inicioChicosMalos);
-    insertar("david", &inicioChicosMalos);
+    insertar("Cristina", &inicioChicosBuenos);
+    insertar("Bruno", &inicioChicosBuenos);
+    insertar("Alberto", &inicioChicosMalos);
+    insertar("David", &inicioChicosMalos);
 
-    printf("chicos buenos:\n");
+    printf("Chicos buenos:\n");
     mostrar(inicioChicosBuenos);
-    printf("chicos malos:\n");
+    printf("Chicos malos:\n");
     mostrar(inicioChicosMalos);
+    printf("\n");
 
+    int cantLegisladores = 4;
+    for (int i = 0; i < cantLegisladores; i++) {
+        registrar_voto_legisladores(&inicioChicosBuenos, &inicioChicosMalos);
+    }
 
-
-    printf("\nya con los legisladores eliminados:\n");
-    printf("chicos buenos:\n");
+    printf("Luego de registrar:\n\n");
+    printf("Chicos buenos:\n");
     mostrar(inicioChicosBuenos);
-    printf("chicos malos:\n");
-    mostrar(inicioChicosMalos);
-
-    registrar_voto_legisladores(&inicioChicosBuenos, &inicioChicosMalos);
-
-    printf("luego de registrar:\n\n");
-    printf("chicos buenos:\n");
-    mostrar(inicioChicosBuenos);
-    printf("chicos malos:\n");
+    printf("Chicos malos:\n");
     mostrar(inicioChicosMalos);
 
     // Liberar memoria
@@ -63,127 +59,142 @@ int main() {
     return 0;
 }
 
-void mostrar(lista *legisladores) //es bien generica para que cuando vos le pases el argumento que quieras solo muestre lo que contiene dentro.
-{
+void mostrar(lista *legisladores) {
     if (legisladores != NULL) {
         printf("%s\n", legisladores->nombre);
         mostrar(legisladores->sgte);
     }
 }
 
-void insertar(char nombre[], lista ** legisladores) //para insertar los nombres.
-{
-    char nombre_minusculas[50];
-    strcpy(nombre_minusculas, nombre); //hago la copia del nombre, lo reemplazo en el resto que diga nombre
-    convertir_a_minusculas(nombre_minusculas); // Convertir a minúsculas por si alguno pone todo en mayusculas.
-
-    lista *nuevo = (lista *)malloc(sizeof(lista)); //asignando el tamaño de el primer nodo.
+void insertar(const char *nombre, lista **legisladores) {
+    char nombre_minusculas[MAX_NOMBRE];
+    strcpy(nombre_minusculas, nombre);
+    convertir_a_minusculas(nombre_minusculas);
+    
+    lista *nuevo = (lista *)asignar_memoria(sizeof(lista));
     strcpy(nuevo->nombre, nombre_minusculas);
-    nuevo->sgte = NULL; //lo inicializa en null siempre
+    nuevo->sgte = NULL;
 
-    if (*legisladores == NULL || strcmp((*legisladores)->nombre, nombre_minusculas) > 0) //en el caso de que la lista este vacia o el dato que ingresas (en este caso un nombre) es menor a 0 (menor a otro nombre ya inicializado)
-    {
-        nuevo->sgte = *legisladores; //como nuevo->sgte estaba en null, ahora lo apunto a legisladores (el valor previamente inicializado)
-        *legisladores = nuevo; // hago que la lista arranque en este valor nuevo q ingrese.
-    } else // al no darse que no es nulo y que el dato que ingresas no es menor a 0 (su resta con el otro nombre) entra aca, quiere decir q va en el medio.
-    {
-        lista *actual = *legisladores; //nodo auxiliar.
-        while (actual->sgte != NULL && strcmp(actual->sgte->nombre, nombre_minusculas) < 0) //aca tiene q pasar que actual->sgte sea disinto de null y que el nombre que previamente ingresaste menos el q ingreaste ahora sea menor q 0
-        {
+    if (*legisladores == NULL || strcmp((*legisladores)->nombre, nombre_minusculas) > 0) {
+        nuevo->sgte = *legisladores;
+        *legisladores = nuevo;
+    } else {
+        lista *actual = *legisladores;
+        while (actual->sgte != NULL && strcmp(actual->sgte->nombre, nombre_minusculas) < 0) {
             actual = actual->sgte;
-        } //en caso que no se cumpla el while.
-        nuevo->sgte = actual->sgte; // Inserta en la posición correcta
-        actual->sgte = nuevo; // lo ordena para no perder el enlace.
+        }
+        nuevo->sgte = actual->sgte;
+        actual->sgte = nuevo;
     }
 }
 
-void liberar(lista *legisladores) //para liberar espacio en la memoria.
-{
+void liberar(lista *legisladores) {
     while (legisladores != NULL) {
-        lista *temp = legisladores; //auxiliar para guardar el nodo completo.
-        legisladores = legisladores->sgte; //para que pase al siguiente nodo de legisladores, cambio el puntero. Y el nodo previo queda listo para borrar, no pierdo el enlace a la referencia del siguiente.
-        free(temp); //ya teniendo el siguiente apuntado, libero el previo con temp.
+        lista *temp = legisladores;
+        legisladores = legisladores->sgte;
+        free(temp);
     }
 }
 
-void convertir_a_minusculas(char *cadena) //en caso que ingrese un nombre en mayusculas, lo convierte a minusculas.
-{
-    int i = 0;
-    while (cadena[i] != '\0') //para las condiciones siempre comillas simples ''
-    {
-        cadena[i] = tolower(cadena[i]); //tolower pasa las mayusculas a minusculas, toupper al reves.
-        i++;
+void convertir_a_minusculas(char *cadena) {
+    for (int i = 0; cadena[i] != '\0'; i++) {
+        cadena[i] = tolower(cadena[i]);
     }
-    cadena[i] = '\0'; // asegurarse de que la cadena esté bien terminada
 }
 
-void suprimir(char nombre[], lista **legisladores) {
-    char nombre_minusculas[50];
-    strcpy(nombre_minusculas, nombre); // hago la copia del nombre
-    convertir_a_minusculas(nombre_minusculas); // Convertir a minúsculas
+void suprimir(const char *nombre, lista **legisladores) {
+    char nombre_minusculas[MAX_NOMBRE];
+    strcpy(nombre_minusculas, nombre);
+    convertir_a_minusculas(nombre_minusculas);
 
     lista *actual = *legisladores;
+
     if (strcmp((*legisladores)->nombre, nombre_minusculas) == 0) {
-        // Si el nodo a eliminar es el primero
-        *legisladores = actual->sgte; // actualiza el inicio de la lista
-        free(actual); // libera el nodo
+        *legisladores = actual->sgte;
+        free(actual);
     } else {
         while (actual->sgte != NULL && strcmp(actual->sgte->nombre, nombre_minusculas) != 0) {
-            actual = actual->sgte; // busca el nodo a eliminar
+            actual = actual->sgte;
         }
-        if (actual->sgte != NULL) { // Si se encontró el nodo a eliminar
-            lista *tmp = actual->sgte; // guarda el nodo a eliminar
-            actual->sgte = tmp->sgte; // actualiza el puntero del nodo anterior
-            free(tmp); // libera el nodo
+        if (actual->sgte != NULL) {
+            lista *tmp = actual->sgte;
+            actual->sgte = tmp->sgte;
+            free(tmp);
         } else {
-            // Mensaje si no se encuentra el legislador
             printf("\nEl legislador \"%s\" no se encuentra en la lista\n", nombre);
         }
     }
 }
 
-int es_miembro(char nombre[], lista **legisladores) //recibirá nombre del legislador y el conjunto que corresponda, retornando verdadero/falso si esta presente o no.
-{
-    char nombre_minusculas[50];
-    strcpy(nombre_minusculas, nombre); //hago la copia del nombre, lo reemplazo en el resto que diga nombre
-    convertir_a_minusculas(nombre_minusculas); // Convertir a minúsculas por si alguno pone todo en mayusculas.
+int es_miembro(const char *nombre, lista **legisladores) {
+    char nombre_minusculas[MAX_NOMBRE];
+    strcpy(nombre_minusculas, nombre);
+    convertir_a_minusculas(nombre_minusculas);
 
     lista *actual = *legisladores;
+
     while (actual != NULL) {
-        if (strcmp(actual->nombre, nombre_minusculas) == 0) //compara dos cadenas de caracteres.
-        {
+        if (strcmp(actual->nombre, nombre_minusculas) == 0) {
             return 1; // Legislador encontrado
         }
-        actual = actual->sgte; // Avanzar al siguiente nodo
+        actual = actual->sgte;
     }
     return 0;
 }
 
 void registrar_voto_legisladores(lista **chicosBuenos, lista **chicosMalos) {
-    char nombre[50];
-    char voto[5];
+    char nombre[MAX_NOMBRE];
+    char voto[MAX_VOTO];
 
-    printf("ingrese un nombre para el legislador:\n");
-    //fgets(nombre , sizeof(nombre) , stdin); //como un scanf, sirve si tenes un nombre compuesto no corta cuando pones el espacio.
+    printf("Ingrese un nombre para el legislador:\n");
     scanf("%s", nombre);
     getchar();
-    convertir_a_minusculas(nombre); // Convertir a minúsculas
+    convertir_a_minusculas(nombre);
 
     if (es_miembro(nombre, chicosBuenos) == 1) {
-        printf("Inserte su voto F (favorable) o D (desfavorable):\n");
-        scanf("%s", voto);
+        do {
+            printf("Inserte su voto F (favorable) o D (desfavorable):\n");
+            scanf("%s", voto);
+            getchar();
+            if (strcmp(voto, "D") != 0 && strcmp(voto, "F") != 0) {
+                printf("El voto ingresado no es valido, intente de nuevo:\n");
+            }
+        } while (strcmp(voto, "D") != 0 && strcmp(voto, "F") != 0);
+
         if (strcmp(voto, "D") == 0) {
             suprimir(nombre, chicosBuenos);
             insertar(nombre, chicosMalos);
         }
     } else if (es_miembro(nombre, chicosMalos) == 1) {
-        printf("Inserte su voto F (favorable) o D (desfavorable):\n");
-        scanf("%s", voto);
+        do {
+            printf("Inserte su voto F (favorable) o D (desfavorable):\n");
+            scanf("%s", voto);
+            getchar();
+            if (strcmp(voto, "D") != 0 && strcmp(voto, "F") != 0) {
+                printf("El voto ingresado no es valido, intente de nuevo:\n");
+            }
+        } while (strcmp(voto, "D") != 0 && strcmp(voto, "F") != 0);
+
         if (strcmp(voto, "F") == 0) {
             suprimir(nombre, chicosMalos);
             insertar(nombre, chicosBuenos);
         }
     } else {
-        printf("el nombre ingresado no es de ningun legislador.");
+        int afirmativo = 0;
+        printf("\nEl nombre ingresado no es de ningun legislador, quiere ingresar uno nuevo? En caso de serlo, toque 1.\n");
+        scanf("%d", &afirmativo);
+        getchar();
+        if (afirmativo == 1) {
+            registrar_voto_legisladores(chicosBuenos, chicosMalos);
+        }
     }
+}
+
+void *asignar_memoria(size_t size) {
+    void *ptr = malloc(size);
+    if (ptr == NULL) {
+        fprintf(stderr, "Error: no se pudo asignar memoria.\n");
+        exit(EXIT_FAILURE);
+    }
+    return ptr;
 }
